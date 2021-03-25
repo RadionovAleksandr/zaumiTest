@@ -1,7 +1,7 @@
 <nz-layout class="layout">
   <nz-header></nz-header>
   <nz-content>
-    <app-create-ticket ></app-create-ticket>
+    <app-create-ticket [citiesData]="citiesData" (createTicketEvent$)="createTicket($event)"></app-create-ticket>
   </nz-content>
 </nz-layout>
 

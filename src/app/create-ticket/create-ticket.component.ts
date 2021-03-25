@@ -1,21 +1,23 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { StoreService } from '../store.service';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { StoreService } from '../services/store.service';
 import { FormControl, FormGroup } from '@angular/forms';
+import { TicketInterface } from '../inerfaces/ticket.interface';
 
 @Component({
   selector: 'app-create-ticket',
   templateUrl: './create-ticket.component.html',
-  styleUrls: ['./create-ticket.component.scss']
+  styleUrls: ['./create-ticket.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateTicketComponent implements OnInit {
-  citiesData: string[];
-  @Output() createTicketEvent$ = new EventEmitter<any>();
+  @Input() citiesData: string[];
+
+  @Output() createTicketEvent$ = new EventEmitter<TicketInterface>();
   form: FormGroup;
 
   constructor(private storeService: StoreService) { }
 
   ngOnInit(): void {
-    this.citiesData = this.storeService.citiesData;
     this.form = new FormGroup({
       placeOfDeparture: new FormControl(),
       dateOfDeparture: new FormControl(),
@@ -26,7 +28,7 @@ export class CreateTicketComponent implements OnInit {
   }
 
   createTicket(): void {
-    console.log('Start createTicket');
-    this.createTicketEvent$.emit();
+    console.log(this.form.value);
+    this.createTicketEvent$.emit(this.form.value);
   }
 }

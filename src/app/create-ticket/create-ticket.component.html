@@ -19,7 +19,7 @@
   <nz-form-item class="form-ticket__item">
     <nz-form-label nzFor="placeOfArrival">Место прилета</nz-form-label>
     <nz-form-control class="form-ticket__control" [nzSpan]="14">
-      <nz-select formControlName="placeOfDeparture" id="placeOfArrival">
+      <nz-select formControlName="placeOfArrival" id="placeOfArrival">
         <nz-option *ngFor="let city of citiesData" [nzValue]="city" [nzLabel]="city"></nz-option>
       </nz-select>
     </nz-form-control>
