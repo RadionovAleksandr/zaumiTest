@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { StoreService } from '../services/store.service';
 import { FormControl, FormGroup } from '@angular/forms';
-import { TicketInterface } from '../inerfaces/ticket.interface';
+import { ITicket } from '../inerfaces/ticket.interface';
 
 @Component({
   selector: 'app-create-ticket',
@@ -10,12 +9,12 @@ import { TicketInterface } from '../inerfaces/ticket.interface';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateTicketComponent implements OnInit {
-  @Input() citiesData: string[];
+  @Input() citiesData: string[] = [];
 
-  @Output() createTicketEvent$ = new EventEmitter<TicketInterface>();
+  @Output() createTicketEvent$ = new EventEmitter<ITicket>();
   form: FormGroup;
 
-  constructor(private storeService: StoreService) { }
+  constructor() { }
 
   ngOnInit(): void {
     this.form = new FormGroup({

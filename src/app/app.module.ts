@@ -17,6 +17,7 @@ import en from '@angular/common/locales/en';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzTableModule } from 'ng-zorro-antd/table';
 
 
 registerLocaleData(en);
@@ -25,6 +26,7 @@ const nzModules = [
   NzLayoutModule,
   NzFormModule,
   NzSelectModule,
+  NzTableModule,
 ];
 
 @NgModule({
@@ -33,7 +35,7 @@ const nzModules = [
     CreateTicketComponent,
     EditTicketComponent,
     TicketComponent,
-    TicketRoutesComponent
+    TicketRoutesComponent,
   ],
   imports: [
     ...nzModules,

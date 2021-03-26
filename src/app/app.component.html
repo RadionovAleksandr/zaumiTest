@@ -1,7 +1,43 @@
 <nz-layout class="layout">
   <nz-header></nz-header>
-  <nz-content>
+  <nz-content class="content">
     <app-create-ticket [citiesData]="citiesData" (createTicketEvent$)="createTicket($event)"></app-create-ticket>
+    <br/>
+    <br/>
+    <section class="ticket">
+      <nz-table class="ticket__table" nzBordered [nzData]="tiketslist">
+        <thead>
+        <tr>
+          <th>Место вылета</th>
+          <th>Время вылета</th>
+          <th>Место приземления</th>
+          <th>Время приземления</th>
+          <th>Действие</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let data of tiketslist" class="editable-row">
+          <td>
+            {{ data.placeOfDeparture }}
+          </td>
+          <td>{{ data.dateOfDeparture }}</td>
+          <td>{{ data.placeOfArrival }}</td>
+          <td>{{ data.dateOfArrival }}</td>
+          <td>
+            <a nz-popconfirm nzPopconfirmTitle="Sure to delete?" (click)="editTicket(data.id)">Редактировать</a><br>
+            <a nz-popconfirm nzPopconfirmTitle="Sure to delete?" (click)="deleteTicket(data.id)">Удалить</a>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+
+      <div class="ticket__routes">
+        <h3>Маршруты</h3>
+        <div *ngFor="let route of ticketRoutes">{{route}}</div>
+      </div>
+    </section>
+
   </nz-content>
 </nz-layout>
 
