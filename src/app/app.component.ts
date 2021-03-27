@@ -17,7 +17,7 @@ export class AppComponent implements OnInit, OnDestroy {
   destroy$ = new Subject();
   editId: string | null = null;
   tiketslist: ITicket[] = [];
-  ticketRoutes: any[];
+  ticketRoutes: string[] = [];
 
   constructor(
     private ticketService: TicketService,
@@ -29,11 +29,6 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.getCities();
     this.getTickets();
-    this.ticketRoutes = [
-      'Новосибирск – Стамбул',
-      'Новосибирск – Париж',
-      'Москва – Париж',
-    ];
   }
 
   ngOnDestroy(): void {
@@ -52,6 +47,7 @@ export class AppComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.destroy$))
     .subscribe(tikets => {
       this.tiketslist = tikets;
+      this.ticketRoutes = this.getRoutes(tikets);
       this.cd.detectChanges();
     });
   }
@@ -75,6 +71,39 @@ export class AppComponent implements OnInit, OnDestroy {
       this.tiketslist = this.tiketslist.filter(d => d.id !== id);
       this.cd.detectChanges();
     });
+  }
+
+  getRoutes(tikets: ITicket[]): string[] {
+    // Алгоритм начало
+    tikets.sort((a: ITicket, b: ITicket) => {
+      return (new Date(a.dateOfArrival).getTime() - new Date(b.dateOfDeparture).getTime());
+    });
+
+    const routes = [];
+    tikets.forEach(ticket => {
+
+      // Записываем в переменную последний билет
+      const currentTicket = { city: ticket.placeOfArrival, date: ticket.dateOfArrival };
+
+      routes.push(ticket);
+
+      // ищем в имеющихся маршрутах возможность пересадки по текущему билету
+      const transplantTicket = { city: ticket.placeOfDeparture, date: ticket.dateOfDeparture };
+      routes.forEach(ticketFilter => {
+        if (ticketFilter.placeOfArrival === transplantTicket.city &&
+          ticketFilter.dateOfArrival < transplantTicket.date) {
+          routes.push({
+            placeOfDeparture: ticketFilter.placeOfDeparture,
+            placeOfArrival: currentTicket.city,
+            dateOfDeparture: ticketFilter.dateOfDeparture,
+            dateOfArrival: currentTicket.date,
+          });
+        }
+      });
+    });
+
+    return routes.map(route => `${route.placeOfDeparture} - ${route.placeOfArrival}`);
+    // Алгоритм конец
   }
 
   editTicket(id: string): void {

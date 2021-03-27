@@ -3,7 +3,7 @@
 }
 
 .content {
-  padding: 0 30px;
+  padding: 10px 30px;
 }
 
 .editable-cell {
@@ -25,4 +25,12 @@
 
 .ticket__table {
   max-width: 60%;
+}
+
+.ticket__routes {
+  width: 300px;
+}
+
+.ticket__route {
+  margin: 5px 0;
 }
