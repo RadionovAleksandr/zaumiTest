@@ -1,11 +1,11 @@
 <nz-layout class="layout">
   <nz-header></nz-header>
   <nz-content class="content">
-    <app-create-ticket
+    <app-form-ticket
       [citiesData]="citiesData"
       (saveTicketEvent$)="saveTicket($event)"
     >
-    </app-create-ticket>
+    </app-form-ticket>
     <br/>
     <br/>
     <section class="ticket">

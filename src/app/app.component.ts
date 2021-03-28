@@ -39,13 +39,13 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   getCities(): void {
-    this.storeService.getCitiesData()
+    this.ticketService.getCitiesData()
     .pipe(takeUntil(this.destroy$))
     .subscribe(cities => this.citiesData = cities);
   }
 
   getTickets(): void {
-    this.storeService.getTicketslist()
+    this.ticketService.checkStorageAndGetTickets()
     .pipe(takeUntil(this.destroy$))
     .subscribe((tickets: ITicket[]) => {
       this.ticketslist = tickets;
@@ -64,7 +64,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.ticketService.updateTicket(ticket)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(() => this.storeService.getTicketslist())
+        switchMap(() => this.ticketService.getTicketslist())
         )
       .subscribe((tickets: ITicket[]) => {
         this.ticketslist = tickets;
@@ -74,7 +74,7 @@ export class AppComponent implements OnInit, OnDestroy {
     } else {
       this.ticketService.createTicket(ticket)
       .pipe(takeUntil(this.destroy$),
-        switchMap(() => this.storeService.getTicketslist())
+        switchMap(() => this.ticketService.getTicketslist())
       )
       .subscribe((tickets: ITicket[]) => {
         this.ticketslist = tickets;
@@ -88,12 +88,29 @@ export class AppComponent implements OnInit, OnDestroy {
   deleteTicket(id: string): void {
     this.ticketService.deleteTicket(id)
     .pipe(takeUntil(this.destroy$),
-      switchMap(() => this.storeService.getTicketslist())
+      switchMap(() => this.ticketService.getTicketslist())
     ).subscribe(() => {
       this.ticketslist = this.ticketslist.filter(d => d.id !== id);
       this.ticketRoutes = this.getRoutes(this.ticketslist);
       this.cd.detectChanges();
     });
+  }
+
+  editTicket(id: string): void {
+     this.ticketService.getTicket(id)
+    .subscribe((ticket: ITicket[]) => {
+      const modalRef = this.modalService.create({
+        nzContent: FormTicketComponent,
+        nzWidth: 500,
+        nzComponentParams: { data: ticket[0], citiesData: this.citiesData },
+        nzOnOk: () => modalRef.getContentComponent().submit()
+      });
+    });
+  }
+
+  clear(): void {
+    this.ticketslist = [];
+    this.cd.detectChanges();
   }
 
   private getRoutes(tickets: ITicket[]): Set<string> {
@@ -150,22 +167,5 @@ export class AppComponent implements OnInit, OnDestroy {
     // Только уникальные значения попадают в маршруты
     return new Set(routes.map(route => `${route.placeOfDeparture} - ${route.placeOfArrival}`));
     // Алгоритм конец
-  }
-
-  editTicket(id: string): void {
-     this.storeService.getTicket(id)
-    .subscribe((ticket: ITicket[]) => {
-      const modalRef = this.modalService.create({
-        nzContent: FormTicketComponent,
-        nzWidth: 500,
-        nzComponentParams: { data: ticket[0], citiesData: this.citiesData },
-        nzOnOk: () => modalRef.getContentComponent().submit()
-      });
-    });
-  }
-
-  clear(): void {
-    this.ticketslist = [];
-    this.cd.detectChanges();
   }
 }

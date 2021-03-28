@@ -33,7 +33,33 @@ export class TicketService {
       .pipe(switchMap(() => of(id)));
   }
 
-  uid(): string {
+  checkStorageAndGetTickets(): Observable<ITicket[]> {
+    const tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+    if (tickets.length) {
+      return of(tickets);
+    }
+    return this.getTicketslist();
+  }
+
+  getTicketslist(): Observable<ITicket[]> {
+
+    this.setStorage(this.storeService.tickets);
+    return of(this.storeService.tickets);
+  }
+
+  getTicket(id: string): Observable<ITicket[]> {
+    return of(this.storeService.tickets.filter(ticket => ticket.id === id));
+  }
+
+  getCitiesData(): Observable<string[]> {
+    return of(this.storeService.citiesData);
+  }
+
+  private uid(): string {
     return Math.random().toString(36).substr(2, 9);
+  }
+
+  private setStorage(tickets: ITicket[]): void {
+    localStorage.setItem('tickets', JSON.stringify(tickets));
   }
 }
