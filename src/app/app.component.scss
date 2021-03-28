@@ -24,6 +24,7 @@
 }
 
 .ticket__table {
+  position: relative;
   max-width: 60%;
 }
 
@@ -33,4 +34,10 @@
 
 .ticket__route {
   margin: 5px 0;
+}
+
+.ticket__btn--clear {
+  position: absolute;
+  right: -80px;
+  top: 0;
 }

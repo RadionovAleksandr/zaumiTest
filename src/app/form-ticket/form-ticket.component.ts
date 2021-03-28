@@ -1,20 +1,23 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ITicket } from '../inerfaces/ticket.interface';
 
 @Component({
-  selector: 'app-create-ticket',
-  templateUrl: './create-ticket.component.html',
-  styleUrls: ['./create-ticket.component.scss'],
+  selector: 'app-form-ticket',
+  templateUrl: './form-ticket.component.html',
+  styleUrls: ['./form-ticket.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateTicketComponent implements OnInit {
+export class FormTicketComponent implements OnInit {
   @Input() citiesData: string[] = [];
-
-  @Output() createTicketEvent$ = new EventEmitter<ITicket>();
+  @Input() data: ITicket;
+  @Output() saveTicketEvent$ = new EventEmitter<ITicket>();
+  mode = 'create';
   form: FormGroup;
+  layout: { [klass: string]: any; };
 
-  constructor() {}
+  constructor(private cd: ChangeDetectorRef) {
+  }
 
   ngOnInit(): void {
     this.form = new FormGroup({
@@ -23,6 +26,16 @@ export class CreateTicketComponent implements OnInit {
       placeOfArrival: new FormControl(undefined, Validators.required),
       dateOfArrival: new FormControl(undefined, Validators.required),
     });
+    if (this.data) {
+      this.mode = 'update';
+      this.form.patchValue(this.data);
+      this.cd.detectChanges();
+    }
+
+    this.layout = {
+      horizontal: this.mode === 'create',
+      vertical: this.mode === 'edit',
+    };
 
     // TODO: подумать над решением
     // this.form.get('dateOfDeparture').valueChanges
@@ -32,13 +45,16 @@ export class CreateTicketComponent implements OnInit {
     //   });
   }
 
-  createTicket(): void {
+  submit(): void {
     const dateOfDeparture = new Date(this.form.get('dateOfDeparture').value);
     const dateOfArrival = new Date(this.form.get('dateOfArrival').value);
     if (!this.form.valid || dateOfDeparture > dateOfArrival) {
-      return console.log('введите корректные данные');
+      return alert('введите корректные данные');
     }
-    console.log(this.form.value);
-    this.createTicketEvent$.emit(this.form.value);
+    if (this.data) {
+      this.saveTicketEvent$.emit({ ...this.form.value, id: this.data.id });
+    } else {
+      this.saveTicketEvent$.emit(this.form.value);
+    }
   }
 }

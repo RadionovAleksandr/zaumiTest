@@ -51,7 +51,11 @@ export class StoreService {
     return of(this.citiesData);
   }
 
-  getTiketslist(): Observable<ITicket[]> {
+  getTicketslist(): Observable<ITicket[]> {
     return of(this.tickets);
+  }
+
+  getTicket(id: string): Observable<ITicket[]> {
+    return of(this.tickets.filter(ticket => ticket.id === id));
   }
 }

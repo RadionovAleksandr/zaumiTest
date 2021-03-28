@@ -1,11 +1,16 @@
 <nz-layout class="layout">
   <nz-header></nz-header>
   <nz-content class="content">
-    <app-create-ticket [citiesData]="citiesData" (createTicketEvent$)="createTicket($event)"></app-create-ticket>
+    <app-create-ticket
+      [citiesData]="citiesData"
+      (saveTicketEvent$)="saveTicket($event)"
+    >
+    </app-create-ticket>
     <br/>
     <br/>
     <section class="ticket">
       <nz-table class="ticket__table" nzBordered [nzData]="ticketslist">
+        <button *ngIf="ticketslist.length" class="ticket__btn--clear" nzType='primary' (click)="clear()">Очистить</button>
         <thead>
         <tr>
           <th>Место вылета</th>
@@ -25,8 +30,8 @@
           <td>{{ data.placeOfArrival }}</td>
           <td>{{ data.dateOfArrival }}</td>
           <td>
-            <a nz-popconfirm nzPopconfirmTitle="Sure to delete?" (click)="editTicket(data.id)">Редактировать</a><br>
-            <a nz-popconfirm nzPopconfirmTitle="Sure to delete?" (click)="deleteTicket(data.id)">Удалить</a>
+            <a nz-popconfirm (click)="editTicket(data.id)">Редактировать</a><br>
+            <a nz-popconfirm (click)="deleteTicket(data.id)">Удалить</a>
           </td>
         </tr>
         </tbody>

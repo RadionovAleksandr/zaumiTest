@@ -4,6 +4,8 @@ import { ITicket } from './inerfaces/ticket.interface';
 import { StoreService } from './services/store.service';
 import { Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
+import { FormTicketComponent } from './form-ticket/form-ticket.component';
+import { NzModalService } from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +14,6 @@ import { switchMap, takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'test';
   citiesData: string[];
   destroy$ = new Subject();
   editId: string | null = null;
@@ -23,6 +24,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private ticketService: TicketService,
     private storeService: StoreService,
     private cd: ChangeDetectorRef,
+    private modalService: NzModalService,
   ) {
   }
 
@@ -43,37 +45,58 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   getTickets(): void {
-    this.storeService.getTiketslist()
+    this.storeService.getTicketslist()
     .pipe(takeUntil(this.destroy$))
-    .subscribe(tikets => {
-      this.ticketslist = tikets;
-      this.ticketRoutes = this.getRoutes(tikets);
+    .subscribe((tickets: ITicket[]) => {
+      this.ticketslist = tickets;
+      this.ticketRoutes = this.getRoutes(tickets);
       this.cd.detectChanges();
     });
   }
 
-  createTicket(ticket: ITicket): void {
-    this.ticketService.createTicket(ticket)
-    .pipe(takeUntil(this.destroy$),
-      switchMap(() => this.storeService.getTiketslist())
-    )
-    .subscribe(tikets => {
-      this.ticketslist = tikets;
-      this.cd.detectChanges();
-    });
+  saveTicket(ticket: ITicket): void {
+    // iif(() => !!ticket.id,
+    //   this.ticketService.updateTicket(ticket),
+    //   this.ticketService.createTicket(ticket),
+    // )
+
+    if (ticket.id) {
+      this.ticketService.updateTicket(ticket)
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(() => this.storeService.getTicketslist())
+        )
+      .subscribe((tickets: ITicket[]) => {
+        this.ticketslist = tickets;
+        this.ticketRoutes = this.getRoutes(tickets);
+        this.cd.detectChanges();
+      });
+    } else {
+      this.ticketService.createTicket(ticket)
+      .pipe(takeUntil(this.destroy$),
+        switchMap(() => this.storeService.getTicketslist())
+      )
+      .subscribe((tickets: ITicket[]) => {
+        this.ticketslist = tickets;
+        this.ticketRoutes = this.getRoutes(tickets);
+        this.cd.detectChanges();
+      });
+    }
+
   }
 
   deleteTicket(id: string): void {
     this.ticketService.deleteTicket(id)
     .pipe(takeUntil(this.destroy$),
-      switchMap(() => this.storeService.getTiketslist())
+      switchMap(() => this.storeService.getTicketslist())
     ).subscribe(() => {
       this.ticketslist = this.ticketslist.filter(d => d.id !== id);
+      this.ticketRoutes = this.getRoutes(this.ticketslist);
       this.cd.detectChanges();
     });
   }
 
-  getRoutes(tickets: ITicket[]): Set<string> {
+  private getRoutes(tickets: ITicket[]): Set<string> {
     // Алгоритм начало
     tickets.sort((a: ITicket, b: ITicket) => {
       return (new Date(a.dateOfArrival).getTime() - new Date(b.dateOfDeparture).getTime());
@@ -130,6 +153,19 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   editTicket(id: string): void {
+     this.storeService.getTicket(id)
+    .subscribe((ticket: ITicket[]) => {
+      const modalRef = this.modalService.create({
+        nzContent: FormTicketComponent,
+        nzWidth: 500,
+        nzComponentParams: { data: ticket[0], citiesData: this.citiesData },
+        nzOnOk: () => modalRef.getContentComponent().submit()
+      });
+    });
+  }
 
+  clear(): void {
+    this.ticketslist = [];
+    this.cd.detectChanges();
   }
 }
