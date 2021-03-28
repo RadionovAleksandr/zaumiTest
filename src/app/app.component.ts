@@ -16,8 +16,8 @@ export class AppComponent implements OnInit, OnDestroy {
   citiesData: string[];
   destroy$ = new Subject();
   editId: string | null = null;
-  tiketslist: ITicket[] = [];
-  ticketRoutes: string[] = [];
+  ticketslist: ITicket[] = [];
+  ticketRoutes: Set<string>;
 
   constructor(
     private ticketService: TicketService,
@@ -46,7 +46,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.storeService.getTiketslist()
     .pipe(takeUntil(this.destroy$))
     .subscribe(tikets => {
-      this.tiketslist = tikets;
+      this.ticketslist = tikets;
       this.ticketRoutes = this.getRoutes(tikets);
       this.cd.detectChanges();
     });
@@ -58,7 +58,7 @@ export class AppComponent implements OnInit, OnDestroy {
       switchMap(() => this.storeService.getTiketslist())
     )
     .subscribe(tikets => {
-      this.tiketslist = tikets;
+      this.ticketslist = tikets;
       this.cd.detectChanges();
     });
   }
@@ -68,41 +68,64 @@ export class AppComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.destroy$),
       switchMap(() => this.storeService.getTiketslist())
     ).subscribe(() => {
-      this.tiketslist = this.tiketslist.filter(d => d.id !== id);
+      this.ticketslist = this.ticketslist.filter(d => d.id !== id);
       this.cd.detectChanges();
     });
   }
 
-  getRoutes(tikets: ITicket[]): string[] {
+  getRoutes(tickets: ITicket[]): Set<string> {
     // Алгоритм начало
-    tikets.sort((a: ITicket, b: ITicket) => {
+    tickets.sort((a: ITicket, b: ITicket) => {
       return (new Date(a.dateOfArrival).getTime() - new Date(b.dateOfDeparture).getTime());
     });
 
     const routes = [];
-    tikets.forEach(ticket => {
-
-      // Записываем в переменную последний билет
-      const currentTicket = { city: ticket.placeOfArrival, date: ticket.dateOfArrival };
-
+    tickets.forEach(ticket => {
       routes.push(ticket);
+      // Записываем в переменную последний билет
+      const currentTickets = [{
+        arrival: { city: ticket.placeOfArrival, date: ticket.dateOfArrival },
+        departure: { city: ticket.placeOfDeparture, date: ticket.dateOfDeparture },
+      }];
 
-      // ищем в имеющихся маршрутах возможность пересадки по текущему билету
-      const transplantTicket = { city: ticket.placeOfDeparture, date: ticket.dateOfDeparture };
-      routes.forEach(ticketFilter => {
-        if (ticketFilter.placeOfArrival === transplantTicket.city &&
-          ticketFilter.dateOfArrival < transplantTicket.date) {
-          routes.push({
-            placeOfDeparture: ticketFilter.placeOfDeparture,
-            placeOfArrival: currentTicket.city,
-            dateOfDeparture: ticketFilter.dateOfDeparture,
-            dateOfArrival: currentTicket.date,
-          });
-        }
-      });
+      // ф-ия находит среди имеющихся маршрутов пересадки и возращает только уникальные значения
+      recursyFind(routes, currentTickets);
     });
 
-    return routes.map(route => `${route.placeOfDeparture} - ${route.placeOfArrival}`);
+    // tslint:disable-next-line:typedef
+    function recursyFind(routesTicket, currentTickets) {
+      const newCurrentTicket = [];
+
+      // ищем в имеющихся маршрутах возможность пересадки по текущему билету
+      routesTicket.forEach((ticketFilter, index) => {
+        currentTickets.forEach(ticket => {
+          if (ticketFilter.placeOfArrival === ticket.departure.city &&
+            ticketFilter.dateOfArrival < ticket.departure.date) {
+
+            // нашли возможность пересадки, пушим в маршруты
+            routesTicket.push({
+              placeOfDeparture: ticketFilter.placeOfDeparture,
+              placeOfArrival: ticket.arrival.city,
+              dateOfDeparture: ticketFilter.dateOfDeparture,
+              dateOfArrival: ticket.arrival.date,
+            });
+
+            // В результате пересадки сформировались "Новые" билеты, их тоже нужно проверить на возможность пересадки
+            newCurrentTicket.push({
+              arrival: { city: ticketFilter.placeOfArrival, date: ticketFilter.dateOfArrival },
+              departure: { city: ticketFilter.placeOfDeparture, date: ticketFilter.dateOfDeparture },
+            });
+
+            if (index === routesTicket[index]) {
+              return recursyFind(routesTicket, newCurrentTicket);
+            }
+          }
+        });
+      });
+    }
+
+    // Только уникальные значения попадают в маршруты
+    return new Set(routes.map(route => `${route.placeOfDeparture} - ${route.placeOfArrival}`));
     // Алгоритм конец
   }
 

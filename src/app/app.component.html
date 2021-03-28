@@ -5,7 +5,7 @@
     <br/>
     <br/>
     <section class="ticket">
-      <nz-table class="ticket__table" nzBordered [nzData]="tiketslist">
+      <nz-table class="ticket__table" nzBordered [nzData]="ticketslist">
         <thead>
         <tr>
           <th>Место вылета</th>
@@ -17,7 +17,7 @@
         </thead>
 
         <tbody>
-        <tr *ngFor="let data of tiketslist" class="editable-row">
+        <tr *ngFor="let data of ticketslist" class="editable-row">
           <td>
             {{ data.placeOfDeparture }}
           </td>
