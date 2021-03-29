@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { StoreService } from './store.service';
 import { ITicket } from '../inerfaces/ticket.interface';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TicketService {
+  updateTicket$ = new Subject();
 
   constructor(private storeService: StoreService) {
   }
@@ -48,7 +49,8 @@ export class TicketService {
   }
 
   getTicket(id: string): Observable<ITicket[]> {
-    return of(this.storeService.tickets.filter(ticket => ticket.id === id));
+    const tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+    return of(tickets.filter(ticket => ticket.id === id));
   }
 
   getCitiesData(): Observable<string[]> {

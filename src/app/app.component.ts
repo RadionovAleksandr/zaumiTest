@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, On
 import { TicketService } from './services/ticket.service';
 import { ITicket } from './inerfaces/ticket.interface';
 import { StoreService } from './services/store.service';
-import { Subject } from 'rxjs';
+import { iif, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
 import { FormTicketComponent } from './form-ticket/form-ticket.component';
 import { NzModalService } from 'ng-zorro-antd/modal';
@@ -31,6 +31,8 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.getCities();
     this.getTickets();
+
+    this.ticketService.updateTicket$.subscribe( (data: ITicket) => this.saveTicket(data));
   }
 
   ngOnDestroy(): void {
@@ -54,35 +56,20 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  saveTicket(ticket: ITicket): void {
-    // iif(() => !!ticket.id,
-    //   this.ticketService.updateTicket(ticket),
-    //   this.ticketService.createTicket(ticket),
-    // )
-
-    if (ticket.id) {
-      this.ticketService.updateTicket(ticket)
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(() => this.ticketService.getTicketslist())
-        )
-      .subscribe((tickets: ITicket[]) => {
-        this.ticketslist = tickets;
-        this.ticketRoutes = this.getRoutes(tickets);
-        this.cd.detectChanges();
-      });
-    } else {
-      this.ticketService.createTicket(ticket)
-      .pipe(takeUntil(this.destroy$),
-        switchMap(() => this.ticketService.getTicketslist())
-      )
-      .subscribe((tickets: ITicket[]) => {
-        this.ticketslist = tickets;
-        this.ticketRoutes = this.getRoutes(tickets);
-        this.cd.detectChanges();
-      });
-    }
-
+  saveTicket(ticket: ITicket): any {
+    return iif(() => !!ticket.id,
+      (this.ticketService.updateTicket(ticket)),
+      (this.ticketService.createTicket(ticket)),
+    )
+    .pipe(
+      takeUntil(this.destroy$),
+      switchMap(() => this.ticketService.getTicketslist())
+    )
+    .subscribe((tickets: ITicket[]) => {
+      this.ticketslist = tickets;
+      this.ticketRoutes = this.getRoutes(tickets);
+      this.cd.detectChanges();
+    });
   }
 
   deleteTicket(id: string): void {

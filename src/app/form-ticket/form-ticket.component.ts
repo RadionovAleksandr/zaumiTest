@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ITicket } from '../inerfaces/ticket.interface';
+import { Subject } from 'rxjs';
+import { TicketService } from '../services/ticket.service';
 
 @Component({
   selector: 'app-form-ticket',
@@ -16,10 +18,14 @@ export class FormTicketComponent implements OnInit {
   form: FormGroup;
   layout: { [klass: string]: any; };
 
-  constructor(private cd: ChangeDetectorRef) {
+  constructor(
+    private cd: ChangeDetectorRef,
+    private ticketService: TicketService,
+  ) {
   }
 
   ngOnInit(): void {
+    this.saveTicketEvent$.subscribe(data => console.log(data));
     this.form = new FormGroup({
       placeOfDeparture: new FormControl(undefined, Validators.required),
       dateOfDeparture: new FormControl(undefined, Validators.required),
@@ -48,11 +54,14 @@ export class FormTicketComponent implements OnInit {
   submit(): void {
     const dateOfDeparture = new Date(this.form.get('dateOfDeparture').value);
     const dateOfArrival = new Date(this.form.get('dateOfArrival').value);
-    if (!this.form.valid || dateOfDeparture > dateOfArrival) {
+    const placeOfDeparture = this.form.get('placeOfDeparture').value;
+    const placeOfArrival = this.form.get('placeOfArrival').value;
+    if (!this.form.valid || dateOfDeparture > dateOfArrival || placeOfDeparture === placeOfArrival) {
       return alert('введите корректные данные');
     }
     if (this.data) {
       this.saveTicketEvent$.emit({ ...this.form.value, id: this.data.id });
+      this.ticketService.updateTicket$.next({ ...this.form.value, id: this.data.id });
     } else {
       this.saveTicketEvent$.emit(this.form.value);
     }
