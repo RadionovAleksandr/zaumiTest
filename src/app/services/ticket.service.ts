@@ -20,10 +20,10 @@ export class TicketService {
   }
 
   updateTicket(ticket: ITicket): Observable<string> {
-    for (let i = 0; this.storeService.tickets.length < i; i++ ) {
+    for (let i = 0; this.storeService.tickets.length > i; i++ ) {
       if (this.storeService.tickets[i].id === ticket.id) {
         this.storeService.tickets[i] = ticket;
-        return;
+        break;
       }
     }
     return of(ticket.id);
@@ -37,13 +37,13 @@ export class TicketService {
   checkStorageAndGetTickets(): Observable<ITicket[]> {
     const tickets = JSON.parse(localStorage.getItem('tickets')) || [];
     if (tickets.length) {
+      this.storeService.tickets = tickets;
       return of(tickets);
     }
     return this.getTicketslist();
   }
 
   getTicketslist(): Observable<ITicket[]> {
-
     this.setStorage(this.storeService.tickets);
     return of(this.storeService.tickets);
   }

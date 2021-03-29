@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, On
 import { TicketService } from './services/ticket.service';
 import { ITicket } from './inerfaces/ticket.interface';
 import { StoreService } from './services/store.service';
-import { iif, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
 import { FormTicketComponent } from './form-ticket/form-ticket.component';
 import { NzModalService } from 'ng-zorro-antd/modal';
@@ -32,7 +32,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.getCities();
     this.getTickets();
 
-    this.ticketService.updateTicket$.subscribe( (data: ITicket) => this.saveTicket(data));
+    this.ticketService.updateTicket$.subscribe((data: ITicket) => this.saveTicket(data));
   }
 
   ngOnDestroy(): void {
@@ -57,11 +57,11 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   saveTicket(ticket: ITicket): any {
-    return iif(() => !!ticket.id,
-      (this.ticketService.updateTicket(ticket)),
-      (this.ticketService.createTicket(ticket)),
-    )
-    .pipe(
+    const req: Observable<string> = ticket.id
+      ? this.ticketService.updateTicket(ticket)
+      : this.ticketService.createTicket(ticket);
+
+    req.pipe(
       takeUntil(this.destroy$),
       switchMap(() => this.ticketService.getTicketslist())
     )
@@ -84,7 +84,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   editTicket(id: string): void {
-     this.ticketService.getTicket(id)
+    this.ticketService.getTicket(id)
     .subscribe((ticket: ITicket[]) => {
       const modalRef = this.modalService.create({
         nzContent: FormTicketComponent,
