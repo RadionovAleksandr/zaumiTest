@@ -10,7 +10,7 @@
     <br/>
     <section class="ticket">
       <nz-table class="ticket__table" nzBordered [nzData]="ticketslist">
-        <button *ngIf="ticketslist.length" class="ticket__btn--clear" nzType='primary' (click)="clear()">Очистить</button>
+        <button *ngIf="ticketslist.length" class="ticket__btn--clear" nzType='primary' (click)="deleteTicket()">Очистить</button>
         <thead>
         <tr>
           <th>Место вылета</th>
@@ -31,7 +31,7 @@
           <td>{{ data.dateOfArrival }}</td>
           <td>
             <a nz-popconfirm (click)="editTicket(data.id)">Редактировать</a><br>
-            <a nz-popconfirm (click)="deleteTicket(data.id)">Удалить</a>
+            <a nz-popconfirm (click)="deleteTicket([data.id])">Удалить</a>
           </td>
         </tr>
         </tbody>

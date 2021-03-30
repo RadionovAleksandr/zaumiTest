@@ -32,6 +32,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.getCities();
     this.getTickets();
 
+    // TODO: костыль
     this.ticketService.updateTicket$.subscribe((data: ITicket) => this.saveTicket(data));
   }
 
@@ -56,7 +57,7 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  saveTicket(ticket: ITicket): any {
+  saveTicket(ticket: ITicket): void {
     const req: Observable<string> = ticket.id
       ? this.ticketService.updateTicket(ticket)
       : this.ticketService.createTicket(ticket);
@@ -72,13 +73,17 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteTicket(id: string): void {
-    this.ticketService.deleteTicket(id)
+  deleteTicket(ids?: string[]): void {
+    const req: Observable<string[]> = ids
+    ? this.ticketService.deleteTicket(ids)
+    : this.ticketService.deleteTicket(this.ticketslist.map(ticket => ticket.id));
+
+    req
     .pipe(takeUntil(this.destroy$),
       switchMap(() => this.ticketService.getTicketslist())
-    ).subscribe(() => {
-      this.ticketslist = this.ticketslist.filter(d => d.id !== id);
-      this.ticketRoutes = this.getRoutes(this.ticketslist);
+    ).subscribe((tickets) => {
+      this.ticketslist = tickets;
+      this.ticketRoutes = this.getRoutes(tickets);
       this.cd.detectChanges();
     });
   }
@@ -93,11 +98,6 @@ export class AppComponent implements OnInit, OnDestroy {
         nzOnOk: () => modalRef.getContentComponent().submit()
       });
     });
-  }
-
-  clear(): void {
-    this.ticketslist = [];
-    this.cd.detectChanges();
   }
 
   private getRoutes(tickets: ITicket[]): Set<string> {

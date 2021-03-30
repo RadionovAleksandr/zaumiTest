@@ -29,9 +29,9 @@ export class TicketService {
     return of(ticket.id);
   }
 
-  deleteTicket(id: string): Observable<string> {
-    return of(this.storeService.tickets = this.storeService.tickets.filter(d => d.id !== id))
-      .pipe(switchMap(() => of(id)));
+  deleteTicket(ids: string[]): Observable<string[]> {
+    ids.forEach(id => this.storeService.tickets = this.storeService.tickets.filter(d => d.id !== id));
+    return of(ids);
   }
 
   checkStorageAndGetTickets(): Observable<ITicket[]> {
