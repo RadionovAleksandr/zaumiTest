@@ -1,5 +1,5 @@
 export interface ITicket {
-  id: string;
+  id?: string;
   placeOfDeparture: string;
   dateOfDeparture: Date | string | number;
   placeOfArrival: string;

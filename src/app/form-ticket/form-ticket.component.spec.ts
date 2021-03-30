@@ -22,4 +22,11 @@ describe('CreateTicketComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should make Event$', () => {
+
+    let result = null;
+    component.saveTicketEvent$.subscribe(v => result = v);
+    component.submit();
+  });
 });

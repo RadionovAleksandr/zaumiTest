@@ -100,7 +100,7 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  private getRoutes(tickets: ITicket[]): Set<string> {
+  getRoutes(tickets: ITicket[]): Set<string> {
     // Алгоритм начало
     tickets.sort((a: ITicket, b: ITicket) => {
       return (new Date(a.dateOfArrival).getTime() - new Date(b.dateOfDeparture).getTime());
