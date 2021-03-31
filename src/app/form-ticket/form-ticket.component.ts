@@ -51,8 +51,9 @@ export class FormTicketComponent implements OnInit {
       return alert('введите корректные данные');
     }
     if (this.data) {
-      // TODO: причина костыля, emit' но не всплывает
+      // TODO: причина костыля, emit'ит но не всплывает.
       this.saveTicketEvent$.emit({ ...this.form.value, id: this.data.id });
+      // TODO: временное решение для обеспечения работоспособности
       this.ticketService.updateTicket$.next({ ...this.form.value, id: this.data.id });
     } else {
       this.saveTicketEvent$.emit(this.form.value);
