@@ -1,6 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { FormTicketComponent } from './form-ticket/form-ticket.component';
@@ -17,6 +16,8 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzInputModule } from 'ng-zorro-antd/input';
 
 
 registerLocaleData(en);
@@ -27,6 +28,8 @@ const nzModules = [
   NzSelectModule,
   NzTableModule,
   NzModalModule,
+  NzInputModule,
+  NzPopconfirmModule,
 ];
 
 @NgModule({
