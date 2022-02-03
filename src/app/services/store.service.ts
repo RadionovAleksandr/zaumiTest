@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { ITicket } from '../inerfaces/ticket.interface';
+import { Ticket } from '../inerfaces/ticket.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StoreService {
-  citiesData: string[] = ['Новосибирск', 'Москва', 'Париж', 'Мюнхен', 'Копенгаген'];
-  tickets: ITicket[] = [
+  citiesList: string[] = ['Новосибирск', 'Москва', 'Париж', 'Мюнхен', 'Копенгаген'];
+  tickets: Ticket[] = [
     {
       dateOfArrival: '2021-03-26T10:00',
       dateOfDeparture: '2021-03-26T08:00',
@@ -42,6 +42,5 @@ export class StoreService {
       placeOfArrival: 'Новосибирск',
       placeOfDeparture: 'Мюнхен',
     },
-
   ];
 }

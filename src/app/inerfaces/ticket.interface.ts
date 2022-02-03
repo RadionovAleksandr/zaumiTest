@@ -1,4 +1,4 @@
-export interface ITicket {
+export interface Ticket {
   id?: string;
   placeOfDeparture: string;
   dateOfDeparture: Date | string | number;

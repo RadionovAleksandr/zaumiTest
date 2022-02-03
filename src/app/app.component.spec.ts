@@ -6,7 +6,7 @@ import { StoreService } from './services/store.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { of } from 'rxjs';
-import { ITicket } from './inerfaces/ticket.interface';
+import { Ticket } from './inerfaces/ticket.interface';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -21,7 +21,7 @@ describe('AppComponent', () => {
     }).compileComponents();
 
     const cd: ChangeDetectorRef = null;
-    const modalService = new NzModalService(null, null, null, null);
+    const modalService = new NzModalService(null, null, null, null, null);
     component = new AppComponent(new TicketService(null), new StoreService(), cd, modalService);
 
   });
@@ -41,13 +41,13 @@ describe('AppComponent', () => {
     };
 
     const cities: string[] = ['', '', '', ''];
-    const tickets: ITicket[] = [ticket, ticket, ticket, ticket];
+    const tickets: Ticket[] = [ticket, ticket, ticket, ticket];
     spyOn(component, 'getCities').and.callFake(() => of(cities).subscribe((respCities => component.citiesData = respCities)));
-    spyOn(component, 'getTickets').and.callFake(() => of(tickets).subscribe((respTickets => component.ticketslist = respTickets)));
+    spyOn(component, 'getTickets').and.callFake(() => of(tickets).subscribe((respTickets => component.ticketlist = respTickets)));
 
     component.ngOnInit();
     expect(component.citiesData.length).toBe(4);
-    expect(component.ticketslist.length).toBe(4);
+    expect(component.ticketlist.length).toBe(4);
   });
 
   it('it should update ticket', () => {
@@ -61,7 +61,7 @@ describe('AppComponent', () => {
       dateOfArrival: updateValue,
     };
 
-    const tickets: ITicket[] = [
+    const tickets: Ticket[] = [
       {
         id: '1',
         dateOfArrival: '2021-03-26T10:00',
@@ -101,42 +101,42 @@ describe('AppComponent', () => {
     ];
 
     spyOn(component, 'saveTicket').and.callFake(() => {
-      tickets.forEach((tic: ITicket) => {
+      tickets.forEach((tic: Ticket) => {
         if (tic.id === ticket.id) {
           tic.dateOfArrival = ticket.dateOfArrival;
         }
       });
-      component.ticketRoutes = component.getRoutes(tickets);
+      component.ticketRoutes = component['ticketService' as any].calculateRoutes(tickets);
     });
 
-    of(tickets).subscribe((ticketslist => component.ticketslist = ticketslist));
+    of(tickets).subscribe((ticketlist => component.ticketlist = ticketlist));
     component.saveTicket(ticket);
-    expect(component.ticketslist.length).toBe(5);
-    expect(component.ticketslist[0].dateOfArrival).toBe(updateValue);
-    expect(component.ticketRoutes.size).toBe(11);
+    expect(component.ticketlist.length).toBe(5);
+    expect(component.ticketlist[0].dateOfArrival).toBe(updateValue);
+    expect(component.ticketRoutes.size).toBe(10);
   });
 
 
   it('it should update create', () => {
     const id = '1';
-    const ticket: ITicket = {
+    const ticket: Ticket = {
       placeOfDeparture: 'Париж',
       dateOfDeparture: '2021-03-26T08:00',
       placeOfArrival: 'Копенгаген',
       dateOfArrival:  '2021-03-26T11:00',
     };
 
-    const tickets: ITicket[] = [];
+    const tickets: Ticket[] = [];
 
     spyOn(component, 'saveTicket').and.callFake(() => {
       ticket.id = id;
       tickets.push(ticket);
     });
 
-    of(tickets).subscribe((ticketslist => component.ticketslist = ticketslist));
+    of(tickets).subscribe((ticketlist => component.ticketlist = ticketlist));
     component.saveTicket(ticket);
-    expect(component.ticketslist.length).toBe(1);
-    expect(component.ticketslist[0].id).toBe(id);
+    expect(component.ticketlist.length).toBe(1);
+    expect(component.ticketlist[0].id).toBe(id);
   });
 
 })

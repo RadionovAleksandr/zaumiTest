@@ -1,49 +1,39 @@
-<nz-layout class="layout">
+<body>
   <nz-header></nz-header>
   <nz-content class="content">
-    <app-form-ticket
-      [citiesData]="citiesData"
-      (saveTicketEvent$)="saveTicket($event)"
-    >
-    </app-form-ticket>
-    <br/>
-    <br/>
-    <section class="ticket">
-      <nz-table class="ticket__table" nzBordered [nzData]="ticketslist">
-        <button *ngIf="ticketslist.length" class="ticket__btn--clear" nzType='primary' (click)="deleteTicket()">Очистить</button>
+    <div class="ticket__table-wrap">
+      <button (click)="createTicket()">Купить билет</button>
+      <button *ngIf="ticketlist.length" class="ticket__btn--clear" nzType='primary' (click)="deleteTicket()">Очистить</button>
+      <nz-table class="ticket__table" nzBordered [nzData]="ticketlist">
         <thead>
-        <tr>
-          <th>Место вылета</th>
-          <th>Время вылета</th>
-          <th>Место приземления</th>
-          <th>Время приземления</th>
-          <th>Действие</th>
-        </tr>
+          <tr>
+            <th>Место вылета</th>
+            <th>Время вылета</th>
+            <th>Место приземления</th>
+            <th>Время приземления</th>
+            <th>Действие</th>
+          </tr>
         </thead>
-
         <tbody>
-        <tr *ngFor="let data of ticketslist" class="editable-row">
-          <td>
-            {{ data.placeOfDeparture }}
-          </td>
-          <td>{{ data.dateOfDeparture }}</td>
-          <td>{{ data.placeOfArrival }}</td>
-          <td>{{ data.dateOfArrival }}</td>
-          <td>
-            <a nz-popconfirm (click)="editTicket(data.id)">Редактировать</a><br>
-            <a nz-popconfirm (click)="deleteTicket([data.id])">Удалить</a>
-          </td>
-        </tr>
+          <tr *ngFor="let data of ticketlist" class="table-row">
+            <td>{{ data.placeOfDeparture }}</td>
+            <td>{{ data.dateOfDeparture }}</td>
+            <td>{{ data.placeOfArrival }}</td>
+            <td>{{ data.dateOfArrival }}</td>
+            <td>
+              <a nz-popconfirm (click)="editTicket(data.id)">Редактировать</a><br>
+              <a nz-popconfirm (click)="deleteTicket([data.id])">Удалить</a>
+            </td>
+          </tr>
         </tbody>
       </nz-table>
+    </div>
 
-      <div class="ticket__routes">
-        <h3>Маршруты</h3>
-        <div class="ticket__route" *ngFor="let route of ticketRoutes">{{route}}</div>
-      </div>
-    </section>
-
+    <div class="ticket__routes">
+      <h3>Маршруты</h3>
+      <div class="ticket__route" *ngFor="let route of ticketRoutes">{{route}}</div>
+    </div>
   </nz-content>
-</nz-layout>
+</body>
 
 

@@ -1,5 +1,5 @@
 <form nz-form class="form-ticket" [formGroup]="form">
-  <div [ngClass]="layout">
+  <div>
     <nz-form-item class="form-ticket__item">
       <nz-form-label nzFor="placeOfDeparture">Место вылета</nz-form-label>
       <nz-form-control class="form-ticket__control" [nzSpan]="14">
@@ -33,11 +33,4 @@
     </nz-form-item>
 
   </div>
-  <button
-    class="form-ticket__button login-form-button login-form-margin"
-    *ngIf="mode === 'create'"
-    (click)="submit()"
-    nzType='primary'>
-    Создать
-  </button>
 </form>

@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ITicket } from '../inerfaces/ticket.interface';
-import { TicketService } from '../services/ticket.service';
+import { Ticket } from '../inerfaces/ticket.interface';
 
 @Component({
   selector: 'app-form-ticket',
@@ -11,17 +10,11 @@ import { TicketService } from '../services/ticket.service';
 })
 export class FormTicketComponent implements OnInit {
   @Input() citiesData: string[] = [];
-  @Input() data: ITicket;
-  @Output() saveTicketEvent$ = new EventEmitter<ITicket>();
-  mode = 'create';
+  @Input() data: Ticket;
+  @Output() saveTicketEvent$ = new EventEmitter<Ticket>();
   form: FormGroup;
-  layout: { [klass: string]: any; };
 
-  constructor(
-    private cd: ChangeDetectorRef,
-    private ticketService: TicketService,
-  ) {
-  }
+  constructor(private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.form = new FormGroup({
@@ -30,34 +23,32 @@ export class FormTicketComponent implements OnInit {
       placeOfArrival: new FormControl(undefined, Validators.required),
       dateOfArrival: new FormControl(undefined, Validators.required),
     });
+
     if (this.data) {
-      this.mode = 'update';
       this.form.patchValue(this.data);
       this.cd.detectChanges();
     }
 
-    this.layout = {
-      horizontal: this.mode === 'create',
-      vertical: this.mode === 'edit',
-    };
+    this.saveTicketEvent$.subscribe(data => {
+      this.form.patchValue(data);
+      this.cd.detectChanges();
+    });
   }
 
   submit(): void {
+    if (!this.isCheckValid()) {
+      return alert('введите корректные данные');
+    }
+
+    this.saveTicketEvent$.emit({ ...this.form.value, id: this.data?.id });
+    this.form.patchValue({});
+  }
+
+  isCheckValid(): boolean {
     const dateOfDeparture = new Date(this.form.get('dateOfDeparture').value);
     const dateOfArrival = new Date(this.form.get('dateOfArrival').value);
     const placeOfDeparture = this.form.get('placeOfDeparture').value;
     const placeOfArrival = this.form.get('placeOfArrival').value;
-    if (!this.form.valid || dateOfDeparture > dateOfArrival || placeOfDeparture === placeOfArrival) {
-      return alert('введите корректные данные');
-    }
-    if (this.data) {
-      // TODO: причина костыля, emit'ит но не всплывает.
-      this.saveTicketEvent$.emit({ ...this.form.value, id: this.data.id });
-      // TODO: временное решение для обеспечения работоспособности
-      this.ticketService.updateTicket$.next({ ...this.form.value, id: this.data.id });
-    } else {
-      this.saveTicketEvent$.emit(this.form.value);
-    }
-    this.form.patchValue({});
+    return !(!this.form.valid || dateOfDeparture > dateOfArrival || placeOfDeparture === placeOfArrival);
   }
 }
