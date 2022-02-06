@@ -1,9 +1,5 @@
-import { Injectable } from '@angular/core';
 import { Ticket } from '../store/models/ticket.models';
 
-@Injectable({
-  providedIn: 'root'
-})
 export class TicketService {
 
   checkStorageAndGetTickets(initialState: Ticket[]): Ticket[] {

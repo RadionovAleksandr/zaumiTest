@@ -10,7 +10,7 @@ import { Ticket } from '../models/ticket.models';
 import { UtilsService } from '../../services/utils';
 import { TicketService } from '../../services/ticket.service';
 
-export const initialTicketState: Ticket[] = [
+const initialTicketState: Ticket[] = [
     {
       dateOfArrival: '2021-03-26T10:00',
       dateOfDeparture: '2021-03-26T08:00',
@@ -47,21 +47,15 @@ export const initialTicketState: Ticket[] = [
       placeOfDeparture: 'Мюнхен',
     },
 ];
-
-export const initialCitiesState: string[] = ['Новосибирск', 'Москва', 'Париж', 'Мюнхен', 'Копенгаген'];
-
+const initialCitiesState: string[] = ['Новосибирск', 'Москва', 'Париж', 'Мюнхен', 'Копенгаген'];
 const utilsService = new UtilsService();
 const ticketService = new TicketService();
-
-function setStorage(tickets: Ticket[]): void {
-  localStorage.setItem('tickets', JSON.stringify(tickets));
-}
 
 const TICKET_REDUCER = createReducer(
   ticketService.checkStorageAndGetTickets(initialTicketState),
   on(createTicket, (tickets, event) => {
     const newTicketState = [...tickets, {...event.ticket, id: utilsService.uid()}];
-    setStorage(newTicketState);
+    ticketService.setStorage(newTicketState);
     return newTicketState;
   }),
   on(updateTicket, (tickets, event) => {
@@ -71,16 +65,16 @@ const TICKET_REDUCER = createReducer(
       }
       return ticket;
     });
-    setStorage(newTicketState);
+    ticketService.setStorage(newTicketState);
     return newTicketState;
   }),
   on(deleteTicket, (tickets, event) => {
     const newTicketState = tickets.filter(ticket => ticket.id !== event.id);
-    setStorage(newTicketState);
+    ticketService.setStorage(newTicketState);
     return newTicketState;
   }),
   on(clearTickets, () => {
-    setStorage([]);
+    ticketService.setStorage([]);
     return [];
   }),
 );
