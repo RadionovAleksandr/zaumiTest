@@ -6,9 +6,9 @@ import { StoreService } from './services/store.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { of } from 'rxjs';
-import { Ticket } from './inerfaces/ticket.interface';
+import { Ticket } from './store/models/ticket.models';
 
-describe('AppComponent', () => {
+xdescribe('AppComponent', () => {
   let component: AppComponent;
   beforeEach(async () => {
     await TestBed.configureTestingModule({

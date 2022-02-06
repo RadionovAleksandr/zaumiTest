@@ -1,65 +1,21 @@
 import { Injectable } from '@angular/core';
-import { StoreService } from './store.service';
-import { Observable, of, Subject } from 'rxjs';
-import { Ticket } from '../inerfaces/ticket.interface';
+import { Ticket } from '../store/models/ticket.models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TicketService {
-  ticketChange$ = new Subject<Ticket[]>();
 
-  constructor(private storeService: StoreService) {}
-
-  createTicket(ticket: Ticket): Observable<string> {
-    ticket.id = this.uid();
-    const tickets = [...this.storeService.tickets, ticket];
-    this.setStorageAndStore(tickets);
-    return of(ticket.id);
-  }
-
-  updateTicket(ticket: Ticket): Observable<string> {
-    for (let i = 0; this.storeService.tickets.length > i; i++ ) {
-      if (this.storeService.tickets[i].id === ticket.id) {
-        this.storeService.tickets[i] = ticket;
-        break;
-      }
-    }
-    this.setStorageAndStore(this.storeService.tickets);
-    return of(ticket.id);
-  }
-
-  deleteTicket(ids: string[]): Observable<string[]> {
-    ids.forEach(id => this.storeService.tickets = this.storeService.tickets.filter(d => d.id !== id));
-    this.setStorageAndStore(this.storeService.tickets);
-    return of(ids);
-  }
-
-  deleteAllTicket(): Observable<null> {
-    this.setStorageAndStore([]);
-    return of(null);
-  }
-
-  checkStorageAndGetTickets(): Observable<Ticket[]> {
+  checkStorageAndGetTickets(initialState: Ticket[]): Ticket[] {
     const tickets = JSON.parse(localStorage.getItem('tickets')) || [];
     if (tickets.length) {
-      this.storeService.tickets = tickets;
-      return of(tickets);
+      return tickets;
     }
-    return of([]);
+    return initialState;
   }
 
-  getTicketlist(): Observable<Ticket[]> {
-    return of(this.storeService.tickets);
-  }
-
-  getTicket(id: string): Observable<Ticket[]> {
-    const tickets = JSON.parse(localStorage.getItem('tickets')) || [];
-    return of(tickets.filter(ticket => ticket.id === id));
-  }
-
-  getCitiesList(): Observable<string[]> {
-    return of(this.storeService.citiesList);
+  setStorage(tickets: Ticket[]): void {
+    localStorage.setItem('tickets', JSON.stringify(tickets));
   }
 
   calculateRoutes(tickets: Ticket[]): Set<string> {
@@ -101,20 +57,5 @@ export class TicketService {
     // Только уникальные значения попадают в маршруты
     return new Set(routes.map(route => `${route.placeOfDeparture} - ${route.placeOfArrival}`));
     // Алгоритм конец
-  }
-
-
-  private setStorageAndStore(tickets: Ticket[]): void {
-    this.setStorage(tickets);
-    this.storeService.tickets = tickets;
-    this.ticketChange$.next(tickets);
-  }
-
-  private uid(): string {
-    return Math.random().toString(36).substr(2, 9);
-  }
-
-  private setStorage(tickets: Ticket[]): void {
-    localStorage.setItem('tickets', JSON.stringify(tickets));
   }
 }

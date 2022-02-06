@@ -18,7 +18,8 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzInputModule } from 'ng-zorro-antd/input';
-
+import { StoreModule } from '@ngrx/store';
+import { citiesReducer, ticketReducer } from './store/reducers/ticket.reducer';
 
 registerLocaleData(en);
 
@@ -46,6 +47,7 @@ const nzModules = [
     FormsModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    StoreModule.forRoot({ tickets: ticketReducer, cities: citiesReducer }),
   ],
   providers: [
     NzModalService,

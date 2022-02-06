@@ -1,11 +1,18 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { TicketService } from './services/ticket.service';
-import { StoreService } from './services/store.service';
 import { Observable, Subject } from 'rxjs';
-import { switchMap, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { FormTicketComponent } from './form-ticket/form-ticket.component';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { Ticket } from './inerfaces/ticket.interface';
+import { Ticket } from './store/models/ticket.models';
+import { Store } from '@ngrx/store';
+import {
+  clearTickets,
+  createTicket,
+  deleteTicket,
+  updateTicket
+} from './store/actions/ticket.actions';
+import {selectCities, selectTickets} from './store/selectors';
 
 @Component({
   selector: 'app-root',
@@ -14,23 +21,20 @@ import { Ticket } from './inerfaces/ticket.interface';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit, OnDestroy {
-  citiesData: string[];
+  cities: string[];
+  cities$: Observable<string[]>;
   destroy$ = new Subject();
   ticketlist: Ticket[] = [];
   ticketRoutes: Set<string>;
 
   constructor(
     private ticketService: TicketService,
-    private storeService: StoreService,
-    private cd: ChangeDetectorRef,
     private modalService: NzModalService,
+    private store: Store,
   ) {}
-
   ngOnInit(): void {
     this.getCities();
     this.getTickets();
-
-    this.ticketService.ticketChange$.pipe(takeUntil(this.destroy$)).subscribe(() => this.getTickets());
   }
 
   ngOnDestroy(): void {
@@ -39,59 +43,37 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   getCities(): void {
-    this.ticketService.getCitiesList()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(cities => this.citiesData = cities);
+    this.store.select(selectCities).pipe(takeUntil(this.destroy$))
+     .subscribe(cities => this.cities = cities);
   }
 
   getTickets(): void {
-    this.ticketService.checkStorageAndGetTickets()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe((tickets: Ticket[]) => {
-      this.ticketlist = tickets;
-      this.ticketRoutes = this.ticketService.calculateRoutes(tickets);
-      this.cd.detectChanges();
+    this.store.select(selectTickets)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((tickets: Ticket[]) => {
+        this.ticketlist = tickets;
+        this.ticketRoutes = this.ticketService.calculateRoutes(tickets);
     });
   }
 
   saveTicket(ticket: Ticket): void {
-    const req: Observable<string> = ticket.id
-      ? this.ticketService.updateTicket(ticket)
-      : this.ticketService.createTicket(ticket);
-
-    req.pipe(
-      takeUntil(this.destroy$),
-      switchMap(() => this.ticketService.getTicketlist())
-    )
-    .subscribe((tickets: Ticket[]) => {
-      this.ticketlist = tickets;
-      this.ticketRoutes = this.ticketService.calculateRoutes(tickets);
-      this.cd.detectChanges();
-    });
+    ticket.id
+      ? this.store.dispatch(updateTicket({ ticket }))
+      : this.store.dispatch(createTicket({ ticket }));
   }
 
-  deleteTicket(ids?: string[]): void {
-    const req: Observable<string[]> = ids
-    ? this.ticketService.deleteTicket(ids)
-    : this.ticketService.deleteAllTicket();
-
-    req
-    .pipe(takeUntil(this.destroy$),
-      switchMap(() => this.ticketService.getTicketlist())
-    ).subscribe((tickets) => {
-      this.ticketlist = tickets;
-      this.ticketRoutes = this.ticketService.calculateRoutes(tickets);
-      this.cd.detectChanges();
-    });
+  deleteTicket(ids?: Ticket['id'][]): void {
+    ids.length
+    ? this.store.dispatch(deleteTicket({ id: ids[0] }))
+    : this.store.dispatch(clearTickets());
   }
 
   editTicket(id: string): void {
-    this.ticketService.getTicket(id)
-    .subscribe((ticket: Ticket[]) => {
+      const ticket = this.ticketlist.find(ticketItem => ticketItem.id === id);
       const modalRef  = this.modalService.create({
         nzContent: FormTicketComponent,
         nzWidth: 500,
-        nzComponentParams: { data: ticket[0], citiesData: this.citiesData },
+        nzComponentParams: { data: ticket, citiesData: this.cities },
         nzOnOk: () => {
           const formTicketInstance: FormTicketComponent  = modalRef.componentInstance;
           formTicketInstance.saveTicketEvent$
@@ -99,7 +81,6 @@ export class AppComponent implements OnInit, OnDestroy {
           formTicketInstance.submit();
         },
       });
-    });
   }
 
   createTicket(): void {
@@ -107,14 +88,13 @@ export class AppComponent implements OnInit, OnDestroy {
         nzTitle: 'Мой будущий билет',
         nzContent: FormTicketComponent,
         nzWidth: 500,
-        nzComponentParams: { citiesData: this.citiesData },
+        nzComponentParams: { citiesData: this.cities } as any,
         nzOnOk: () => {
-          const formTicketInstance: FormTicketComponent  = modalRef.componentInstance;
+          const formTicketInstance: FormTicketComponent = modalRef.componentInstance;
           formTicketInstance.saveTicketEvent$
             .pipe(takeUntil(this.destroy$)).subscribe((data) => this.saveTicket(data));
           formTicketInstance.submit();
         },
       });
-
   }
 }

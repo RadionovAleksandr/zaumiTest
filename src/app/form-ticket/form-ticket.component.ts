@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Ticket } from '../inerfaces/ticket.interface';
+import { Ticket } from '../store/models/ticket.models';
 
 @Component({
   selector: 'app-form-ticket',
