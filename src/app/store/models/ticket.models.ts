@@ -1,7 +1,7 @@
 export interface Ticket {
   id?: string;
   placeOfDeparture: string;
-  dateOfDeparture: Date | string | number;
+  dateOfDeparture: string;
   placeOfArrival: string;
-  dateOfArrival: Date | string | number;
+  dateOfArrival: string;
 }
